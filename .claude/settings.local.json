@@ -1,0 +1,11 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(git add:*)",
+      "Bash(git commit -m ':*)",
+      "Bash(git init:*)",
+      "Bash(git commit:*)",
+      "Bash(grep -E \"^#{2,4} \")"
+    ]
+  }
+}
