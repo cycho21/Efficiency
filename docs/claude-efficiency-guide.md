@@ -4529,6 +4529,7 @@ src/
 ├── utils/        # 공통 유틸리티
 └── config/       # 설정
 ```
+```
 
 **주요 패턴**:
 - [사용하는 디자인 패턴]
@@ -4648,6 +4649,8 @@ src/
 - **허용**: 800-1,500줄 (약 2,500-4,500 토큰)
 - **경고**: 1,500-2,000줄 (분할 고려)
 - **위험**: 2,000줄 이상 (즉시 분할)
+
+※ 실제 토큰 수는 언어, 코드 복잡도, 주석 비율에 따라 크게 달라질 수 있습니다. 위 수치는 일반적인 텍스트 기준 (~3 토큰/줄)이며, 코드가 많거나 특수 문자가 많으면 더 높을 수 있습니다.
 
 ---
 
@@ -4832,6 +4835,8 @@ After (최적화 후):
 - 캐시 효과: 히트율 +40%p
 - 총 효과: 약 60-70% 비용 절감
 ```
+
+※ 실제 효과는 프로젝트 특성, 파일 구조, 작업 패턴, CLAUDE.md 내용에 따라 달라질 수 있습니다. 위 수치는 참고용 예시입니다.
 
 ---
 
@@ -5277,18 +5282,22 @@ tmp/
 
 **검증 방법**:
 
+다음과 같은 명령어가 있다면 유용할 것입니다 (현재 Claude Code CLI에서 미지원, 수동 확인 필요):
+
 ```bash
-# 현재 제외되는 파일 확인 (claude 명령 사용시)
-claude files --show-ignored
+# 개념적 예시 (실제 명령어가 아닐 수 있음)
+# claude files --show-ignored    # 제외된 파일 목록
+# claude files --stats            # 파일 통계
 
-# 읽기 가능한 파일 수 확인
-claude files --stats
+# 수동 확인 방법:
+# 1. 전체 파일 수
+find . -type f | wc -l
 
-# 예상 출력:
-# Total files: 12,543
-# Readable files: 287 (2.3%)
-# Ignored files: 12,256 (97.7%)
-# Estimated tokens saved: ~475,000
+# 2. Git이 추적하는 파일 수
+git ls-files | wc -l
+
+# 3. .claudeignore 패턴 테스트
+# .gitignore 문법과 동일하므로 git check-ignore 명령 참고
 ```
 
 **최적화 효과**:
@@ -5321,11 +5330,20 @@ After (.claudeignore 최적화):
 - **검증**: 실수 방지 (커밋 전 체크)
 - **최적화**: 세션 시작시 상태 요약
 
-**플랫폼 지원**:
-- **Claude Code CLI**: Hooks 기능 지원 (2024년 기준)
-- **Claude API**: 직접 지원 안 함 (애플리케이션 레벨에서 구현 필요)
+---
 
-**주의**: 이 섹션은 Claude Code CLI 기준입니다. API 사용자는 동일한 로직을 애플리케이션 코드로 구현해야 합니다.
+**⚠️ 중요 고지사항**:
+
+이 섹션은 프로젝트 자동화를 위한 권장 패턴을 설명합니다. **Claude Code CLI의 `.claude/hooks/` 디렉토리를 통한 Hook 공식 지원 여부는 Claude Code 공식 문서를 확인하세요.**
+
+**대안**:
+- **Git Hooks**: `.git/hooks/`를 사용하여 동일한 검증 로직 구현 가능 (Git 기본 기능)
+- **CI/CD**: GitHub Actions, GitLab CI 등으로 자동화
+- **Pre-commit Framework**: [pre-commit.com](https://pre-commit.com) 사용
+
+이 섹션의 Hook 예시는 Git hooks나 다른 자동화 도구로도 그대로 적용할 수 있습니다.
+
+---
 
 ---
 
@@ -5464,16 +5482,140 @@ progress.md에서 읽음:
 
 #### 각 Hook 상세 예시
 
-**상세 구현 예시는 `examples/hooks-examples.md`에서 확인하세요.**
+**완전한 pre-commit Hook 예시**:
 
-해당 파일에는 다음이 포함됩니다:
-- 각 Hook의 전체 스크립트 코드 (bash/python)
-- 설정 방법 (`.claude/hooks/` 구조)
-- 출력 예시 (실제 실행 결과)
-- 주의사항 및 성능 고려
-- 토큰 영향도 분석
+다음은 즉시 사용 가능한 pre-commit Hook입니다:
 
-**파일 참조**: `examples/hooks-examples.md` (향후 작성 예정)
+```bash
+#!/bin/bash
+# .claude/hooks/pre-commit
+# 커밋 전 자동 검증으로 실수 방지
+
+echo "🔍 pre-commit Hook 실행 중..."
+
+# 1. 대용량 파일 체크 (5MB 이상)
+echo "  - 대용량 파일 체크..."
+for file in $(git diff --cached --name-only); do
+  if [ -f "$file" ]; then
+    size=$(wc -c < "$file" 2>/dev/null || echo 0)
+    if [ $size -gt 5242880 ]; then  # 5MB
+      echo ""
+      echo "⛔ pre-commit Hook 실패!"
+      echo ""
+      echo "문제: 파일이 너무 큽니다"
+      echo "파일: $file ($(($size / 1024 / 1024))MB)"
+      echo ""
+      echo "조치:"
+      echo "  1. git reset HEAD $file"
+      echo "  2. 해당 파일을 .claudeignore에 추가"
+      echo "  3. Git LFS 사용 고려: git lfs track \"$file\""
+      echo ""
+      exit 1
+    fi
+  fi
+done
+
+# 2. 민감 정보 파일 체크
+echo "  - 민감 정보 파일 체크..."
+for file in $(git diff --cached --name-only); do
+  if [[ "$file" == *.env* ]] || [[ "$file" == *.pem ]] || \
+     [[ "$file" == *credentials* ]] || [[ "$file" == *.key ]]; then
+    echo ""
+    echo "⛔ pre-commit Hook 실패!"
+    echo ""
+    echo "문제: 민감 정보 파일이 감지되었습니다"
+    echo "파일: $file"
+    echo ""
+    echo "조치:"
+    echo "  1. git reset HEAD $file"
+    echo "  2. .gitignore에 추가"
+    echo "  3. 이미 커밋된 경우: git filter-repo 사용"
+    echo ""
+    exit 1
+  fi
+done
+
+# 3. CLAUDE.md 크기 체크 (2000줄 초과시 경고)
+if git diff --cached --name-only | grep -q "CLAUDE.md"; then
+  if [ -f ".claude/CLAUDE.md" ]; then
+    lines=$(wc -l < ".claude/CLAUDE.md")
+    if [ $lines -gt 2000 ]; then
+      echo ""
+      echo "⚠️  경고: CLAUDE.md가 너무 큽니다 ($lines줄)"
+      echo "   권장: 2,000줄 미만 (현재: $lines줄)"
+      echo "   상세 내용은 별도 파일로 분리하는 것을 고려하세요."
+      echo ""
+      # 경고만 표시, 커밋은 허용
+    fi
+  fi
+fi
+
+echo "✅ pre-commit 검사 완료"
+exit 0
+```
+
+**설치 방법**:
+
+```bash
+# 1. Hook 디렉토리 생성
+mkdir -p .claude/hooks
+
+# 2. Hook 파일 생성
+cat > .claude/hooks/pre-commit << 'EOF'
+[위 스크립트 내용 붙여넣기]
+EOF
+
+# 3. 실행 권한 부여
+chmod +x .claude/hooks/pre-commit
+
+# 4. 테스트
+.claude/hooks/pre-commit
+# 예상 출력: ✅ pre-commit 검사 완료
+
+# 5. Git 커밋
+git add .claude/hooks/pre-commit
+git commit -m "Add pre-commit hook for validation"
+```
+
+**실제 동작 예시**:
+
+```bash
+# 예시 1: .env 파일 커밋 시도
+$ git add .env
+$ git commit -m "Add config"
+
+🔍 pre-commit Hook 실행 중...
+  - 대용량 파일 체크...
+  - 민감 정보 파일 체크...
+
+⛔ pre-commit Hook 실패!
+
+문제: 민감 정보 파일이 감지되었습니다
+파일: .env
+
+조치:
+  1. git reset HEAD .env
+  2. .gitignore에 추가
+  3. 이미 커밋된 경우: git filter-repo 사용
+
+# 커밋이 차단됨 ✓
+
+# 예시 2: 정상 커밋
+$ git add src/api/user.ts
+$ git commit -m "Add user API"
+
+🔍 pre-commit Hook 실행 중...
+  - 대용량 파일 체크...
+  - 민감 정보 파일 체크...
+✅ pre-commit 검사 완료
+
+[main abc1234] Add user API
+ 1 file changed, 50 insertions(+)
+```
+
+**추가 Hook 예시**:
+
+post-edit, session-start 등 다른 Hook의 상세 구현 예시는 향후 `examples/hooks-examples.md` 파일에서 제공 예정입니다. 위의 pre-commit Hook 패턴을 참고하여 필요한 Hook을 직접 작성할 수 있습니다.
 
 ---
 
@@ -5645,12 +5787,18 @@ exit 1
 ```bash
 # 긴급시 Hook 스킵 가능하도록
 
-# Git hook의 경우
+# Git hook의 경우 (Git 기본 기능)
 git commit --no-verify -m "Emergency fix"
 
-# Claude Code hook의 경우
-export CLAUDE_SKIP_HOOKS=1
-claude ...
+# Claude Code hook의 경우 (예시, 실제 구현 확인 필요)
+# export CLAUDE_SKIP_HOOKS=1
+# claude ...
+# 
+# 또는 Hook 스크립트 내부에서 환경 변수 체크 구현:
+# if [ "$SKIP_HOOKS" = "1" ]; then
+#   echo "⚠️ Hook 스킵됨"
+#   exit 0
+# fi
 ```
 
 **가이드라인**: 
@@ -5766,11 +5914,13 @@ After (설정 완료):
 
 ## 다음 섹션 예고
 
-**4. 프롬프팅 베스트 프랙티스** (다음 Task에서 작성 예정)
+**4. 프롬프팅 베스트 프랙티스**
 - 4.1 공통 원칙
 - 4.2 코딩 작업용 프롬프팅
 - 4.3 문서 작성용 프롬프팅
 - 4.4 리팩토링/리뷰용 프롬프팅
+
+다음 섹션에서는 Claude와 효과적으로 소통하는 방법을 다룹니다.
 
 ---
 
