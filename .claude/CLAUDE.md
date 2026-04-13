@@ -11,3 +11,7 @@
 10. **Save state before clearing** - write progress.md with completed/in-progress/next steps before context reset
 11. **Always display status line** - show context usage and session state regularly
 12. **Maintain .claudeignore actively** - add unnecessary files (logs, builds, deps, binaries) to prevent context waste
+
+## Rules
+- Never use `cd && git ...` pattern
+- Always use `git -C <path>` instead

@@ -1,11 +1,58 @@
 {
   "permissions": {
     "allow": [
-      "Bash(git add:*)",
-      "Bash(git commit -m ':*)",
-      "Bash(git init:*)",
-      "Bash(git commit:*)",
-      "Bash(grep -E \"^#{2,4} \")"
+      "Bash(cd [a-zA-Z0-9_-]* && *)",
+      "Bash(cd ./* && *)",
+      "Bash(git:*)",
+      "Bash(grep:*)",
+      "Bash(cat:*)",
+      "Bash(ls:*)",
+      "Bash(find:*)",
+      "Bash(wc:*)",
+      "Bash(chmod +x:*)",
+      "Bash(pacman:*)",
+      "Bash(choco install:*)",
+      "Bash(~/.claude/block-command-chaining/hook.sh)",
+      "Read(//tmp/**)",
+      "Bash(echo \"exit: $?\")",
+      "Bash(awk:*)",
+      "Bash(]\" | head -10)",
+      "Bash(python3:*)"
+    ]
+  },
+  "hooks": {
+    "PreToolUse": [
+      {
+        "matcher": "Read",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "~/.claude/read-once/hook.sh"
+          }
+        ]
+      }
+    ],
+    "PostToolUse": [
+      {
+        "matcher": "Bash",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "~/.claude/filter-logs/filter-logs.sh"
+          }
+        ]
+      }
+    ],
+    "PostCompact": [
+      {
+        "matcher": "",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "~/.claude/read-once/compact.sh"
+          }
+        ]
+      }
     ]
   }
 }
