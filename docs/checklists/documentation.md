@@ -487,8 +487,8 @@ grep -r "\[.*\](" docs/
 
 ## 참고 자료
 
-- **메인 가이드**: [클로드 효율적 이용 가이드](../claude-efficiency-guide.md)
-- **관련 섹션**: [4.6절 문서 작성](../claude-efficiency-guide.md#46-문서-작성)
+- **메인 가이드**: [클로드 효율적 이용 가이드](../README.md)
+- **관련 섹션**: [4.6절 문서 작성](../sections/04-prompting.md#46-문서-작성)
 - **다른 체크리스트**:
   - [토큰 최적화 체크리스트](./token-optimization.md)
   - [코드 리뷰 체크리스트](./code-review.md) *(작성 예정)*

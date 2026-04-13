@@ -314,7 +314,7 @@ async function getUser(id) {
 }
 ```
 
-**참고**: [메인 가이드 3.3절 Hooks 설정](../claude-efficiency-guide.md#33-hooks-설정) *(섹션 작성 예정)*
+**참고**: [메인 가이드 3.3절 Hooks 설정](../sections/03-project-setup.md#33-hooks-설정) *(섹션 작성 예정)*
 
 ---
 
@@ -536,8 +536,8 @@ async function getUser(id) {
 
 ## 참고 자료
 
-- **메인 가이드**: [클로드 효율적 이용 가이드](../claude-efficiency-guide.md)
-- **관련 섹션**: [4.5절 코드 리뷰](../claude-efficiency-guide.md#45-코드-리뷰) *(섹션 작성 예정)*
+- **메인 가이드**: [클로드 효율적 이용 가이드](../README.md)
+- **관련 섹션**: [4.5절 코드 리뷰](../sections/04-prompting.md#45-코드-리뷰) *(섹션 작성 예정)*
 - **다른 체크리스트**:
   - [토큰 최적화 체크리스트](./token-optimization.md)
   - [문서 작성 체크리스트](./documentation.md)
