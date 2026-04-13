@@ -6855,7 +6855,7 @@ Section 1, 2 완성 후 다음 섹션 계속.
 [ ] 링크 유효성 (내부/외부)
 ```
 
-**추가 리소스**: 상세한 문서 작성 템플릿은 `examples/prompt-templates.md` 참조 (향후 제공)
+**추가 리소스**: 상세한 문서 작성 템플릿은 `examples/prompt-templates.md` 참조
 
 ---
 
