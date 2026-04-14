@@ -644,5 +644,5 @@ Module cohesion:
 
 ## 참고
 
-- docs/claude-efficiency-guide.md - 섹션 8.4: 캐시 친화적 프로젝트 구조
-- docs/claude-efficiency-guide.md - 섹션 7.2: 캐시 히트율 분석 및 개선
+- docs/sections/08-advanced.md - 섹션 8.4: 캐시 친화적 프로젝트 구조
+- docs/sections/07-measurement.md - 섹션 7.2: 캐시 히트율 분석 및 개선

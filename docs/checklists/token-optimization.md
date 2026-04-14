@@ -61,7 +61,7 @@ cat .claudeignore | grep -E "node_modules|dist|build|venv|__pycache__|target"
 - 공통: `.git/`, `*.log`, `.env`
 
 **실패시 조치**:
-`.claudeignore`에 언어별 필수 패턴을 추가하세요. 자세한 내용은 [메인 가이드 3.2절](../sections/03-project-setup.md#32-claudeignore-설정) 참조.
+`.claudeignore`에 언어별 필수 패턴을 추가하세요. 자세한 내용은 [메인 가이드 3.2절](../sections/03-project-setup/03-2-claudeignore.md) 참조.
 
 ---
 
@@ -74,7 +74,7 @@ ls -la .claude/CLAUDE.md
 ```
 
 **실패시 조치**:
-`.claude/CLAUDE.md` 파일을 생성하고 기본 템플릿을 작성하세요. [메인 가이드 3.1절](../sections/03-project-setup.md#31-claudemd-작성-가이드) 참조.
+`.claude/CLAUDE.md` 파일을 생성하고 기본 템플릿을 작성하세요. [메인 가이드 3.1절](../sections/03-project-setup/03-1-claude-md.md) 참조.
 
 ---
 
@@ -133,7 +133,7 @@ ls -la .claude/hooks/
 - `post-edit`: 파일 수정 후 체크
 
 **실패시 조치**:
-최소한 `session-start` Hook을 설정하세요. [메인 가이드 3.3절](../sections/03-project-setup.md#33-hooks-설정) 및 [Hook 예시](../examples/hooks-examples.md) 참조.
+최소한 `session-start` Hook을 설정하세요. [메인 가이드 3.3절](../sections/03-project-setup/03-3-hooks.md) 및 [Hook 예시](../examples/hooks-examples.md) 참조.
 
 ---
 
@@ -152,7 +152,7 @@ ls -la .claude/hooks/
 **실패시 조치**:
 - 프롬프트에서 "위에서 읽은", "방금 분석한" 같은 표현 사용
 - Claude에게 "다시 읽어줘"라고 요청하지 않기
-- [메인 가이드 2.1 규칙 1](../sections/02-token-optimization.md#규칙-1-같은-세션에서-이미-읽은-파일을-다시-읽지-마라) 참조
+- [메인 가이드 2.1 규칙 1](../sections/02-token-optimization/02-1-principles.md#규칙-1-같은-세션에서-이미-읽은-파일을-다시-읽지-마라) 참조
 
 ---
 
@@ -229,7 +229,7 @@ cache_hit_rate = cache_read_input_tokens / input_tokens * 100
 - CLAUDE.md 수정 빈도 줄이기
 - 세션을 5분 이내 간격으로 유지
 - 자주 참조하는 파일을 세션 초기에 로드
-- [메인 가이드 2.3절](../sections/02-token-optimization.md#23-캐시-히트율-최적화-전략) 참조
+- [메인 가이드 2.3절](../sections/02-token-optimization/02-3-optimization.md) 참조
 
 ---
 
@@ -342,7 +342,7 @@ find . -name "*.js" -o -name "*.ts" -o -name "*.py" | xargs wc -l | sort -rn | h
 **실패시 조치**:
 - 세션 중 Claude가 불필요한 파일을 읽으면 즉시 .claudeignore 업데이트
 - `post-edit` Hook으로 자동 제안 설정
-- [메인 가이드 3.2절](../sections/03-project-setup.md#32-claudeignore-설정) 참조
+- [메인 가이드 3.2절](../sections/03-project-setup/03-2-claudeignore.md) 참조
 
 ---
 
@@ -394,7 +394,7 @@ find . -name "*.js" -o -name "*.ts" -o -name "*.py" | xargs wc -l | sort -rn | h
 - 작업 범위를 먼저 파악
 - 필요한 파일 목록을 명시
 - "모든 파일", "전체 프로젝트" 같은 표현 지양
-- [메인 가이드 4.1절](../sections/04-prompting.md#41-공통-원칙) 참조
+- [메인 가이드 4.1절](../sections/04-prompting/04-1-common.md) 참조
 
 ---
 
@@ -492,7 +492,7 @@ find . -name "*.js" -o -name "*.ts" -o -name "*.py" | xargs wc -l | sort -rn | h
   2. CLAUDE.md 작성
   3. 파일 재읽기 방지
 - 2주 내 재점검 목표
-- [메인 가이드 2장](../sections/02-token-optimization.md) 정독
+- [메인 가이드 2장](../sections/02-token-optimization/) 정독
 
 #### 60-69점: 미흡
 - 기본 설정부터 시작

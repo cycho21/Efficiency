@@ -12,24 +12,24 @@
 - **빠른 시작**: 5분 안에 적용 가능한 핵심 3가지
 - **예상 시간**: 15-20분
 
-### [2. 토큰 최적화 전략](sections/02-token-optimization.md)
-- **11가지 기본 원칙**: 파일 재읽기 방지, 병렬 도구 호출, 컨텍스트 압축 등
-- **캐싱 이해하기**: 프롬프트 캐싱 메커니즘 상세 설명
-- **캐시 최적화**: 70% 이상 히트율 달성 전략
+### 2. 토큰 최적화 전략
+- **[2.1 기본 원칙](sections/02-token-optimization/02-1-principles.md)**: 파일 재읽기 방지, 병렬 도구 호출, 컨텍스트 압축 등 11가지 핵심 규칙
+- **[2.2 컨텍스트 캐싱 이해하기](sections/02-token-optimization/02-2-caching.md)**: 프롬프트 캐싱 메커니즘 상세 설명
+- **[2.3 캐시 히트율 최적화](sections/02-token-optimization/02-3-optimization.md)**: 70% 이상 히트율 달성 전략
 - **예상 시간**: 45-60분
 - **🔥 가장 중요한 섹션**
 
-### [3. 프로젝트 설정](sections/03-project-setup.md)
-- **CLAUDE.md 작성**: 프로젝트 규칙 및 컨벤션 정의
-- **.claudeignore 설정**: 불필요한 파일 제외 패턴
-- **Hooks 설정**: 자동화 및 검증 훅
+### 3. 프로젝트 설정
+- **[3.1 CLAUDE.md 작성](sections/03-project-setup/03-1-claude-md.md)**: 프로젝트 규칙 및 컨벤션 정의
+- **[3.2 .claudeignore 설정](sections/03-project-setup/03-2-claudeignore.md)**: 불필요한 파일 제외 패턴
+- **[3.3 Hooks 설정](sections/03-project-setup/03-3-hooks.md)**: 자동화 및 검증 훅
 - **예상 시간**: 30-40분
 
-### [4. 프롬프팅 베스트 프랙티스](sections/04-prompting.md)
-- **공통 원칙**: 명확성, 컨텍스트, 구조화
-- **코딩 작업**: 구현, 리팩토링, 디버깅 프롬프트
-- **문서 작성**: README, API 문서, 기술 블로그
-- **리뷰 작업**: 코드 리뷰, 아키텍처 리뷰
+### 4. 프롬프팅 베스트 프랙티스
+- **[4.1 공통 원칙](sections/04-prompting/04-1-common.md)**: 명확성, 컨텍스트, 구조화
+- **[4.2 코딩 작업용](sections/04-prompting/04-2-coding.md)**: 구현, 리팩토링, 디버깅 프롬프트
+- **[4.3 문서 작성용](sections/04-prompting/04-3-documentation.md)**: README, API 문서, 기술 블로그
+- **[4.4 리팩토링/리뷰용](sections/04-prompting/04-4-refactoring.md)**: 코드 리뷰, 아키텍처 리뷰
 - **예상 시간**: 35-45분
 
 ### [5. 워크플로우 패턴](sections/05-workflows.md)
@@ -84,7 +84,7 @@
 
 ### 초보자 (30-45분)
 ```
-1.2 용어 정의 → 1.3 빠른 시작 → 2.1 기본 원칙 (처음 5개) 
+1.2 용어 정의 → 1.3 빠른 시작 → 2.1 기본 원칙 
 → 3.1 CLAUDE.md → 3.2 .claudeignore → 4.1 공통 원칙
 ```
 

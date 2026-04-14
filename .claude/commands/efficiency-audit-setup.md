@@ -732,5 +732,5 @@ EOF
 
 ## 참고
 
-- docs/claude-efficiency-guide.md - 섹션 3: 프로젝트 설정
+- docs/sections/03-project-setup/ - 프로젝트 설정 가이드 (섹션 3.1-3.3)
 - docs/examples/hooks-examples.md - Hook 설정 예시

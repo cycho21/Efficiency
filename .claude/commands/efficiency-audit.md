@@ -197,7 +197,7 @@ fi
 
   3. [SETUP] CLAUDE.md too small
      Impact: Missing optimization guidance
-     Fix: Add token rules from docs/claude-efficiency-guide.md
+     Fix: Add token rules from docs/sections/02-token-optimization/02-1-principles.md
      Time: 10 minutes
   
   4. [CACHE] CLAUDE.md unstable (15 changes/month)
@@ -379,15 +379,15 @@ Time Investment vs. Return:
 
 📚 Reference Documentation:
 
-  Full guide:      docs/claude-efficiency-guide.md
+  Full guide:      docs/README.md
   Checklists:      docs/checklists/
   Examples:        docs/examples/
 
   Specific sections:
-    - Token optimization:    Section 2
-    - Project setup:         Section 3
-    - Cache optimization:    Section 8.4
-    - Measurement:           Section 7
+    - Token optimization:    docs/sections/02-token-optimization/
+    - Project setup:         docs/sections/03-project-setup/
+    - Cache optimization:    docs/sections/08-advanced.md (섹션 8.4)
+    - Measurement:           docs/sections/07-measurement.md
 
 🔄 Re-Audit After Changes:
 

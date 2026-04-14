@@ -644,7 +644,7 @@ if [ $score -lt 15 ]; then
   
   if [ ! -f .claude/CLAUDE.md ] && [ ! -f CLAUDE.md ]; then
     echo "3. Create CLAUDE.md with token optimization rules"
-    echo "   See: docs/claude-efficiency-guide.md"
+    echo "   See: docs/sections/02-token-optimization/02-1-principles.md"
     echo "   Impact: Better cache hit rate"
     echo ""
   fi
@@ -756,4 +756,4 @@ File size distribution:
 ## 참고
 
 - docs/checklists/token-optimization.md - 21개 체크리스트 상세
-- docs/claude-efficiency-guide.md - 섹션 2: 토큰 최적화 전략
+- docs/sections/02-token-optimization/ - 토큰 최적화 전략 (섹션 2.1-2.3)
