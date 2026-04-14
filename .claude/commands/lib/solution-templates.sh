@@ -12,9 +12,21 @@ set -euo pipefail
 # Args: severity impact effort
 # Returns: priority score (higher = more urgent)
 calculate_priority_score() {
+  # Validate arguments
+  if [[ $# -ne 3 ]]; then
+    echo "Error: calculate_priority_score requires 3 args (severity impact effort)" >&2
+    return 1
+  fi
+
   local severity=$1
   local impact=$2
   local effort=$3
+
+  # Validate numeric inputs
+  if ! [[ "$impact" =~ ^[0-9]+$ ]] || ! [[ "$effort" =~ ^[0-9]+$ ]]; then
+    echo "Error: impact and effort must be numeric" >&2
+    return 1
+  fi
 
   # Severity weight
   local severity_score
@@ -33,6 +45,6 @@ calculate_priority_score() {
     echo "scale=0; $severity_score + ($roi * 10)" | bc
   else
     # Fallback to awk if bc not available
-    awk "BEGIN {roi = $impact / ($effort + 1); print int($severity_score + (roi * 10))}"
+    awk "BEGIN {roi = $impact / ($effort + 1); print int($severity_score + (roi * 10) + 0.5)}"
   fi
 }
