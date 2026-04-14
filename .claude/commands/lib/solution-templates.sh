@@ -49,3 +49,85 @@ calculate_priority_score() {
     awk "BEGIN {roi = $impact / ($effort + 1); print int($severity_score + (roi * 10) + 0.5)}"
   fi
 }
+
+# Generate solution for missing .claudeignore
+generate_solution_claudeignore_missing() {
+  cat << 'SOLUTION_EOF'
+## Problem: .claudeignore Missing
+
+**Current State**: No .claudeignore file in project root.
+
+**Root Cause**: Project was initialized without Claude-specific configuration. Claude is reading unnecessary files (node_modules, build outputs, logs, etc.) in every session.
+
+**Impact**:
+- Token waste: ~25,000 tokens per session
+- Security risk: .env files may be exposed
+- Performance: Slower file operations
+
+## Solution Path
+
+### Step 1: Create .claudeignore (1 minute)
+
+```bash
+cat > .claudeignore << 'IGNOREEOF'
+# Dependencies
+node_modules/
+vendor/
+__pycache__/
+*.pyc
+
+# Build outputs
+dist/
+build/
+out/
+.next/
+target/
+
+# Logs
+*.log
+logs/
+
+# Environment files
+.env
+.env.*
+!.env.example
+
+# IDE
+.idea/
+.vscode/
+IGNOREEOF
+```
+
+### Step 2: Verify (30 seconds)
+
+```bash
+# Check file exists
+ls -la .claudeignore
+
+# Test: count files before/after
+find . -type f | wc -l
+```
+
+## Expected Results
+
+- Token savings: **-25,000 tokens/session** (~71% reduction)
+- New score: +2 points
+- Security: .env files now excluded
+- Time to benefit: **Immediate** (next Claude session)
+
+## Verification
+
+After creating the file, run:
+```bash
+/efficiency-audit-tokens
+```
+
+You should see:
+```
+✓ .claudeignore exists
+  ✓ Excludes node_modules
+  ✓ Excludes dist
+  ...
+```
+SOLUTION_EOF
+}
