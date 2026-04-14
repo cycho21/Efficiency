@@ -431,7 +431,7 @@ write_solutions_to_report() {
 **Priority Score**: $priority
 **Impact**: -${impact} tokens/session
 **Effort**: ${effort} minutes
-**ROI**: $(calculate_priority_score "$sev" "$impact" "$effort" | awk '{print int($1/10)}') tokens/minute
+**ROI**: $(awk "BEGIN {roi = $impact / ($effort + 1); print int(roi + 0.5)}") tokens/minute
 
 ---
 
