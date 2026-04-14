@@ -246,7 +246,7 @@ npm run build
 
 ## Expected Results
 
-- Token savings: **-\$((file_count * 4000)) tokens/session**
+- Token savings: **-$((file_count * 4000)) tokens/session**
 - Cache hit rate: **+15-25%**
 - Score improvement: **+1 to +2 points**
 
