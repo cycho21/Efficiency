@@ -42,7 +42,8 @@ calculate_priority_score() {
   if command -v bc &>/dev/null; then
     roi=$(echo "scale=2; $impact / ($effort + 1)" | bc)
     # Final priority = severity + (ROI * 10)
-    echo "scale=0; $severity_score + ($roi * 10)" | bc
+    # Add 0.5 before truncation to achieve round-half-up
+    echo "scale=0; ($severity_score + ($roi * 10) + 0.5) / 1" | bc
   else
     # Fallback to awk if bc not available
     awk "BEGIN {roi = $impact / ($effort + 1); print int($severity_score + (roi * 10) + 0.5)}"
