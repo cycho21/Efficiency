@@ -215,6 +215,34 @@ fi
 ═══════════════════════════════════════════════════════════
 ```
 
+### Step 7.5: Extract Scores for Analysis
+
+```bash
+# Note: In a real execution, these would be captured from sub-skill outputs
+# For now, set defaults if not already set
+: ${token_score:=0}
+: ${cache_score:=0}
+: ${setup_score:=0}
+
+# Calculate totals
+total_score=$((token_score + cache_score + setup_score))
+
+# Determine overall grade
+if [ $total_score -ge 42 ]; then
+  overall_grade="A+"
+elif [ $total_score -ge 38 ]; then
+  overall_grade="A"
+elif [ $total_score -ge 32 ]; then
+  overall_grade="B"
+elif [ $total_score -ge 24 ]; then
+  overall_grade="C"
+elif [ $total_score -ge 16 ]; then
+  overall_grade="D"
+else
+  overall_grade="F"
+fi
+```
+
 ### Step 8: Analyze Failed Items
 
 ```bash
