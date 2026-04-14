@@ -162,13 +162,13 @@ generate_solution_large_files() {
 
 Identify logical groups:
 
-\\\`\\\`\\\`bash
+\`\`\`bash
 # Count functions/classes
 grep -E "^(export )?(function|class|const)" $largest_file | wc -l
 
 # Look for natural boundaries
 grep -E "^//" $largest_file
-\\\`\\\`\\\`
+\`\`\`
 
 Questions:
 - Distinct feature areas?
@@ -179,28 +179,28 @@ Questions:
 
 Suggested split:
 
-\\\`\\\`\\\`
+\`\`\`
 ${largest_file%.ts}/
   ├── core.ts       (200-300 lines)
   ├── helpers.ts    (150-200 lines)
   ├── types.ts      (100-150 lines)
   ├── constants.ts  (50-100 lines)
   └── index.ts      (50 lines - re-exports)
-\\\`\\\`\\\`
+\`\`\`
 
 ### Step 3: Extract Modules (30 minutes)
 
 **Before** - $largest_file:
-\\\`\\\`\\\`typescript
+\`\`\`typescript
 // Everything in one file (${largest_lines} lines)
 export interface User { ... }
 export const API_URL = "...";
 export function validateUser() { ... }
 export class UserService { ... }
-\\\`\\\`\\\`
+\`\`\`
 
 **After** - Organized:
-\\\`\\\`\\\`typescript
+\`\`\`typescript
 // types.ts
 export interface User { ... }
 
@@ -218,31 +218,31 @@ export * from './types';
 export * from './constants';
 export * from './helpers';
 export { UserService } from './services/userService';
-\\\`\\\`\\\`
+\`\`\`
 
 ### Step 4: Update Imports (15 minutes)
 
-\\\`\\\`\\\`bash
+\`\`\`bash
 # Find importers
 grep -r "from.*${largest_file%.ts}" . --include="*.ts"
-\\\`\\\`\\\`
+\`\`\`
 
 Update:
-\\\`\\\`\\\`typescript
+\`\`\`typescript
 // Before
 import { User, validateUser } from './$largest_file';
 
 // After
 import { User, validateUser } from './${largest_file%.ts}';
-\\\`\\\`\\\`
+\`\`\`
 
 ### Step 5: Test (10 minutes)
 
-\\\`\\\`\\\`bash
+\`\`\`bash
 npm run type-check
 npm test
 npm run build
-\\\`\\\`\\\`
+\`\`\`
 
 ## Expected Results
 
@@ -260,11 +260,11 @@ Code Quality:
 
 ## Verification
 
-Run \\\`/efficiency-audit-cache\\\`:
-\\\`\\\`\\\`
+Run \`/efficiency-audit-cache\`:
+\`\`\`
 ✓ No files over 1000 lines
 Cache Friendliness Score: 13/15 (was 10/15)
-\\\`\\\`\\\`
+\`\`\`
 SOLUTION_EOF
 }
 
@@ -304,7 +304,7 @@ Keep only:
 - Testing requirements
 - Token optimization rules
 
-\\\`\\\`\\\`markdown
+\`\`\`markdown
 # Project Guidelines
 
 ## Architecture
@@ -321,21 +321,21 @@ Keep only:
 - Don't re-read files
 - Execute parallel tool calls
 - Keep files under 500 lines
-\\\`\\\`\\\`
+\`\`\`
 
 ### Step 3: Move Volatile Content (5 minutes)
 
 Session-specific → Session prompts:
-\\\`\\\`\\\`
+\`\`\`
 Currently working on auth feature.
 See docs/auth-spec.md for requirements.
-\\\`\\\`\\\`
+\`\`\`
 
 Feature-specific → Feature docs:
-\\\`\\\`\\\`
+\`\`\`
 docs/features/auth.md
 docs/features/payments.md
-\\\`\\\`\\\`
+\`\`\`
 
 ### Step 4: Establish Update Policy
 
@@ -353,10 +353,10 @@ docs/features/payments.md
 ## Verification
 
 Monitor for 30 days:
-\\\`\\\`\\\`bash
+\`\`\`bash
 git log --since="30 days ago" --oneline -- .claude/CLAUDE.md | wc -l
 # Target: ≤ 3
-\\\`\\\`\\\`
+\`\`\`
 SOLUTION_EOF
 }
 
