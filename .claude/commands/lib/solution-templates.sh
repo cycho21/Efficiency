@@ -267,3 +267,95 @@ Cache Friendliness Score: 13/15 (was 10/15)
 \\\`\\\`\\\`
 SOLUTION_EOF
 }
+
+# Generate solution for unstable CLAUDE.md
+# Args: changes_per_month
+generate_solution_unstable_claude_md() {
+  local changes=$1
+
+  cat << SOLUTION_EOF
+## Problem: CLAUDE.md Unstable
+
+**Current State**: CLAUDE.md changed $changes times in the last 30 days.
+
+**Root Cause**: Mixing stable project rules with volatile session-specific guidance.
+
+**Impact**:
+- Cache invalidation: Every change invalidates the prompt cache
+- Token waste: ~8,000 tokens per invalidation
+- Estimated cost: +20-30% token usage
+
+## Solution Path
+
+### Step 1: Separate Concerns (20 minutes)
+
+Identify what's changing frequently:
+- Session-specific TODOs?
+- Temporary debugging rules?
+- Feature-in-progress guidance?
+
+These should NOT be in CLAUDE.md.
+
+### Step 2: Create Stable CLAUDE.md (10 minutes)
+
+Keep only:
+- Project architecture/conventions
+- Coding standards
+- Testing requirements
+- Token optimization rules
+
+\\\`\\\`\\\`markdown
+# Project Guidelines
+
+## Architecture
+- Next.js 14 App Router
+- Server components by default
+- Client components only when needed
+
+## Coding Standards
+- TypeScript strict mode
+- No any types
+- Prefer composition over inheritance
+
+## Token Optimization
+- Don't re-read files
+- Execute parallel tool calls
+- Keep files under 500 lines
+\\\`\\\`\\\`
+
+### Step 3: Move Volatile Content (5 minutes)
+
+Session-specific → Session prompts:
+\\\`\\\`\\\`
+Currently working on auth feature.
+See docs/auth-spec.md for requirements.
+\\\`\\\`\\\`
+
+Feature-specific → Feature docs:
+\\\`\\\`\\\`
+docs/features/auth.md
+docs/features/payments.md
+\\\`\\\`\\\`
+
+### Step 4: Establish Update Policy
+
+- Review CLAUDE.md monthly (not daily)
+- Changes require team approval
+- Version control for major changes
+
+## Expected Results
+
+- Changes/month: $changes → 2-3
+- Cache hit rate: +20%
+- Token savings: **-8,000 tokens/session**
+- Grade improvement: +1 point
+
+## Verification
+
+Monitor for 30 days:
+\\\`\\\`\\\`bash
+git log --since="30 days ago" --oneline -- .claude/CLAUDE.md | wc -l
+# Target: ≤ 3
+\\\`\\\`\\\`
+SOLUTION_EOF
+}
