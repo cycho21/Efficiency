@@ -215,188 +215,201 @@ fi
 ═══════════════════════════════════════════════════════════
 ```
 
-### Step 8: Quick Fix Script (Critical 이슈만)
-
-자동 수정 가능한 Critical 이슈들에 대한 bash 스크립트 생성:
-
-```
-═══════════════════════════════════════════════════════════
-                      AUTO-FIX SCRIPT
-═══════════════════════════════════════════════════════════
-
-The following script fixes auto-fixable critical issues:
+### Step 8: Analyze Failed Items
 
 ```bash
-#!/bin/bash
-# Auto-generated efficiency fixes
-# Run this to fix critical issues automatically
+echo "Analyzing issues..."
 
-echo "Applying efficiency fixes..."
-echo ""
+failed_items=()
 
-# Fix 1: Create .claudeignore
-if [ ! -f .claudeignore ]; then
-  echo "Creating .claudeignore..."
-  cat > .claudeignore << 'IGNOREEOF'
-# Dependencies
-node_modules/
-vendor/
-__pycache__/
-*.pyc
-
-# Build outputs
-dist/
-build/
-out/
-.next/
-target/
-*.min.js
-*.bundle.js
-
-# Logs
-*.log
-logs/
-npm-debug.log*
-
-# Environment files
-.env
-.env.*
-!.env.example
-
-# IDE settings
-.idea/
-.vscode/
-*.swp
-*.swo
-
-# OS files
-.DS_Store
-Thumbs.db
-
-# Test coverage
-coverage/
-.nyc_output/
-IGNOREEOF
-  echo "✓ .claudeignore created"
-else
-  echo "⊘ .claudeignore already exists"
+# Collect TOKEN failures
+if [ $token_score -lt 21 ]; then
+  # .claudeignore missing
+  if [ ! -f .claudeignore ]; then
+    failed_items+=("TOKEN|CRITICAL|.claudeignore missing|25000|2|no_config_file|create_file")
+  fi
+  
+  # Large files
+  large_count=$(find . -type f \( -name "*.ts" -o -name "*.js" -o -name "*.py" \) \
+    -not -path "*/node_modules/*" -not -path "*/.git/*" \
+    -exec wc -l {} \; 2>/dev/null | awk '$1 > 1000' | wc -l)
+  if [ $large_count -gt 0 ]; then
+    impact=$((large_count * 4000))
+    effort=$((large_count * 45))
+    failed_items+=("TOKEN|CRITICAL|Large files detected ($large_count files)|$impact|$effort|large_files|refactor")
+  fi
+  
+  # .env not excluded
+  env_count=$(find . -name ".env*" -not -path "*/node_modules/*" -not -path "*/.git/*" 2>/dev/null | wc -l)
+  if [ $env_count -gt 0 ] && ! grep -q "\.env" .claudeignore 2>/dev/null; then
+    failed_items+=("TOKEN|CRITICAL|.env files not excluded ($env_count files)|2000|1|missing_patterns|edit_file")
+  fi
+  
+  # Missing essential patterns in .claudeignore
+  if [ -f .claudeignore ]; then
+    missing_patterns=()
+    for pattern in "node_modules" "dist" "build" "*.log"; do
+      if ! grep -q "$pattern" .claudeignore; then
+        missing_patterns+=("$pattern")
+      fi
+    done
+    
+    if [ ${#missing_patterns[@]} -gt 0 ]; then
+      failed_items+=("TOKEN|IMPORTANT|Missing .claudeignore patterns (${#missing_patterns[@]} patterns)|5000|2|missing_patterns|edit_file")
+    fi
+  fi
 fi
 
-# Fix 2: Ensure CLAUDE.md exists
-if [ ! -f .claude/CLAUDE.md ] && [ ! -f CLAUDE.md ]; then
-  echo "Creating basic CLAUDE.md..."
-  mkdir -p .claude
-  cat > .claude/CLAUDE.md << 'CLAUDEEOF'
-# Project Guidelines for Claude
-
-## Token Optimization Rules
-1. Don't re-read files already accessed in the same session
-2. Avoid unnecessary tool calls - verify necessity before execution
-3. Execute parallel tool calls when possible - batch independent operations
-4. Keep file sizes under 500 lines for better caching
-5. Maintain .claudeignore actively - exclude build outputs and dependencies
-
-## Project Info
-[Add your project-specific description and rules here]
-CLAUDEEOF
-  echo "✓ CLAUDE.md created"
-else
-  echo "⊘ CLAUDE.md already exists"
+# Collect CACHE failures
+if [ $cache_score -lt 15 ]; then
+  # CLAUDE.md unstable
+  claude_file=""
+  [ -f .claude/CLAUDE.md ] && claude_file=".claude/CLAUDE.md"
+  [ -f CLAUDE.md ] && claude_file="CLAUDE.md"
+  
+  if [ -n "$claude_file" ] && git rev-parse --git-dir >/dev/null 2>&1; then
+    changes=$(git log --since="30 days ago" --oneline -- "$claude_file" 2>/dev/null | wc -l)
+    if [ $changes -gt 10 ]; then
+      failed_items+=("CACHE|IMPORTANT|CLAUDE.md unstable ($changes changes/month)|8000|30|unstable_config|stabilize")
+    fi
+  fi
+  
+  # No type separation
+  if find . -name "*.ts" -not -path "*/node_modules/*" | head -1 >/dev/null 2>&1; then
+    type_files=$(find . \( -name "types.ts" -o -name "*.types.ts" -o -name "*.d.ts" \) \
+      -not -path "*/node_modules/*" 2>/dev/null | wc -l)
+    if [ $type_files -eq 0 ]; then
+      failed_items+=("CACHE|MINOR|No dedicated type files|2000|15|no_type_files|create")
+    fi
+  fi
 fi
 
+# Collect SETUP failures
+if [ $setup_score -lt 10 ]; then
+  # No hooks
+  if [ ! -f .claude/settings.json ] || ! grep -q "hooks" .claude/settings.json 2>/dev/null; then
+    failed_items+=("SETUP|MINOR|No hooks configured|1000|5|no_hooks|configure")
+  fi
+  
+  # CLAUDE.md missing or too small
+  if [ ! -f .claude/CLAUDE.md ] && [ ! -f CLAUDE.md ]; then
+    failed_items+=("SETUP|IMPORTANT|CLAUDE.md missing|3000|10|no_config_file|create_file")
+  elif [ -f .claude/CLAUDE.md ] || [ -f CLAUDE.md ]; then
+    claude_file=".claude/CLAUDE.md"
+    [ -f CLAUDE.md ] && claude_file="CLAUDE.md"
+    lines=$(wc -l < "$claude_file")
+    if [ "$lines" -lt 20 ]; then
+      failed_items+=("SETUP|MINOR|CLAUDE.md too small ($lines lines)|2000|10|incomplete_config|expand")
+    fi
+  fi
+fi
+
+echo "Found ${#failed_items[@]} issues to analyze"
 echo ""
-echo "✓ Auto-fixes complete!"
-echo ""
-echo "Manual fixes still needed:"
-echo "  - Split large files (> 1000 lines)"
-echo "  - Review and expand CLAUDE.md content"
-echo ""
-echo "Re-run /efficiency-audit to verify improvements."
 ```
 
-Copy and run this script:
+### Step 9: Generate Solutions
+
 ```bash
-bash /tmp/efficiency-fixes.sh
+
+# Skip if perfect project
+if [ ${#failed_items[@]} -eq 0 ]; then
+  echo ""
+  echo "═══════════════════════════════════════════════════════════"
+  echo "🎉 Excellent! No improvements needed."
+  echo "═══════════════════════════════════════════════════════════"
+  echo ""
+  echo "Your project is already optimized."
+  echo "Current grade: $overall_grade (Score: $total_score/46)"
+  echo ""
+  exit 0
+fi
+
+echo "Generating solutions..."
+
+# Source helper library
+script_dir="$(dirname "${BASH_SOURCE[0]}")"
+source "$script_dir/lib/solution-templates.sh"
+
+# Calculate priorities and sort
+sorted_issues=()
+for issue in "${failed_items[@]}"; do
+  IFS='|' read -r cat sev title impact effort root fix <<< "$issue"
+  priority=$(calculate_priority_score "$sev" "$impact" "$effort")
+  sorted_issues+=("$priority|$issue")
+done
+
+# Sort descending by priority
+IFS=$'\n' sorted_issues=($(sort -rn -t'|' -k1 <<< "${sorted_issues[*]}"))
+unset IFS
+
+# Limit to top 10 if too many
+if [ ${#sorted_issues[@]} -gt 10 ]; then
+  echo "⚠️  Found ${#sorted_issues[@]} issues - reporting top 10 priorities"
+  sorted_issues=("${sorted_issues[@]:0:10}")
+fi
+
+# Create report file
+solutions_file="docs/efficiency-reports/$(date +%Y-%m-%d)-report.md"
+mkdir -p docs/efficiency-reports 2>/dev/null || {
+  # Fallback to /tmp if can't create in docs
+  solutions_file="/tmp/efficiency-report-$(date +%Y-%m-%d).md"
+  echo "⚠️  Using fallback location: $solutions_file"
+}
+
+# Generate report
+generate_report "$solutions_file" "$total_score" "$overall_grade" "${sorted_issues[@]}"
+write_solutions_to_report "$solutions_file" "${sorted_issues[@]}"
+write_action_plan "$solutions_file" "${sorted_issues[@]}"
+
+echo "Report generation complete"
+echo ""
 ```
 
-═══════════════════════════════════════════════════════════
-```
+### Step 10: Display Summary
 
-### Step 9: 예상 개선 효과
+```bash
 
-현재 점수를 기반으로 개선 후 예상 효과 계산:
+echo "═══════════════════════════════════════════════════════════"
+echo "                 IMPROVEMENT RECOMMENDATIONS"
+echo "═══════════════════════════════════════════════════════════"
+echo ""
 
-```
-═══════════════════════════════════════════════════════════
-                   IMPROVEMENT POTENTIAL
-═══════════════════════════════════════════════════════════
-
-If all critical + important issues are fixed:
-
-  Current State:
-    - Efficiency: ~XX%
-    - Avg session tokens: ~XX,XXX
-    - Monthly cost (50 sessions): ~$XXX
-
-  After Improvements:
-    - Efficiency: ~YY% (+ZZ% improvement)
-    - Avg session tokens: ~YY,YYY (-Z,ZZZ tokens)
-    - Monthly cost (50 sessions): ~$YYY (-$ZZ saved)
-
-  Annual Savings: ~$ZZZ
-
-Time Investment vs. Return:
-  - Critical fixes: 30-60 minutes → 40-50% immediate improvement
-  - Important fixes: 2-4 hours → additional 10-15% improvement
-  - Minor fixes: 1-2 hours → additional 5% improvement
-
-═══════════════════════════════════════════════════════════
-```
-
-### Step 10: 다음 단계 안내
-
-```
-═══════════════════════════════════════════════════════════
-                       NEXT STEPS
-═══════════════════════════════════════════════════════════
-
-📋 Recommended Action Plan:
-
-  TODAY (Critical - 30-60 min):
-    1. Run auto-fix script above
-    2. Add missing patterns to .claudeignore
-    3. Create/expand CLAUDE.md
+# Show top 5 in terminal
+top_count=0
+for item in "${sorted_issues[@]}"; do
+  [ $top_count -ge 5 ] && break
   
-  THIS WEEK (Important - 2-4 hours):
-    4. Split files > 1000 lines into modules
-    5. Stabilize CLAUDE.md (reduce change frequency)
-    6. Extract shared types to separate files
+  IFS='|' read -r priority cat sev title impact effort root fix <<< "$item"
   
-  THIS MONTH (Minor - 1-2 hours):
-    7. Set up useful hooks (session-start, pre-commit)
-    8. Improve documentation structure
-    9. Review and optimize module boundaries
+  # Icon based on severity
+  case $sev in
+    CRITICAL) icon="🔴" ;;
+    IMPORTANT) icon="🟡" ;;
+    MINOR) icon="🟢" ;;
+  esac
+  
+  # Calculate ROI
+  if command -v bc &>/dev/null; then
+    roi=$(echo "scale=0; $impact / ($effort + 1)" | bc)
+  else
+    roi=$(awk "BEGIN {print int($impact / ($effort + 1))}")
+  fi
+  
+  echo "$icon [$cat] $title"
+  echo "   Impact: -${impact} tokens/session"
+  echo "   Effort: ${effort} minutes"
+  echo "   ROI: ${roi} tokens/minute"
+  echo ""
+  
+  top_count=$((top_count + 1))
+done
 
-📚 Reference Documentation:
-
-  Full guide:      docs/README.md
-  Checklists:      docs/checklists/
-  Examples:        docs/examples/
-
-  Specific sections:
-    - Token optimization:    docs/sections/02-token-optimization/
-    - Project setup:         docs/sections/03-project-setup/
-    - Cache optimization:    docs/sections/08-advanced.md (섹션 8.4)
-    - Measurement:           docs/sections/07-measurement.md
-
-🔄 Re-Audit After Changes:
-
-  Run /efficiency-audit again after making improvements
-  to verify score increase and identify remaining issues.
-
-═══════════════════════════════════════════════════════════
-
-Audit complete! 🎉
+echo "Full report saved: $solutions_file"
+echo ""
+echo "═══════════════════════════════════════════════════════════"
+echo ""
+echo "Audit complete! 🎉"
 ```
 
 </PROCEDURE>
